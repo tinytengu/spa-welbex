@@ -1,3 +1,5 @@
+from random import randint
+
 from flask import Blueprint, jsonify, request
 
 from ..db import db
@@ -140,3 +142,25 @@ def delete_item(id: int):
 
     # Return deleted item to the client
     return jsonify(item)
+
+
+@bp.route('/fill', methods=['GET'])
+def fill_items():
+    args = request.args.to_dict()
+    count = int(args.get('count', 10))
+
+    if count < 1:
+        return jsonify({'error': 'Invalid count value'})
+
+    for _ in range(count):
+        item = TableItem(
+            date=datetime.now(),
+            amount=randint(0, 100),
+            distance=float(randint(0, 5000)),
+            name=f'Item {randint(0, 9999)}'
+        )
+        db.session.add(item)
+
+    db.session.commit()
+
+    return jsonify(f'Added {count} items')
