@@ -42,13 +42,29 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="i in items" :key="i.id">
+          <tr v-for="i in get_items()" :key="i.id">
             <td v-for="f in table_fields" :key="f">
               {{ i[f] }}
             </td>
           </tr>
         </tbody>
       </table>
+      <nav v-if="get_pages_count() != 0">
+        <ul class="pagination">
+          <!-- Previous -->
+          <li class="page-item" :class="page == 0 ? 'disabled' : ''">
+            <a class="page-link" href="#" @click.prevent="page--">Previous</a>
+          </li>
+          <!-- Pages -->
+          <li class="page-item" :class="page == i - 1 ? 'active' : ''" v-for="i in get_pages_count()" :key="i">
+            <a class="page-link" href="#" @click.prevent="page = i - 1">{{ i }}</a>
+          </li>
+          <!-- Next -->
+          <li class="page-item" :class="page == get_pages_count() - 1 ? 'disabled' : ''">
+            <a class="page-link" href="#" @click.prevent="page++">Next</a>
+          </li>
+        </ul>
+      </nav>
     </div>
   </div>
 </template>
@@ -83,7 +99,9 @@ export default {
         'date',
         'amount',
         'distance'
-      ]
+      ],
+      page: 0,
+      perPage: 10
     }
   },
   mounted () {
@@ -118,6 +136,14 @@ export default {
       this.sort_value = ''
 
       this.fetch_items()
+    },
+    get_pages_count () {
+      return Math.ceil(this.items.length / this.perPage)
+    },
+    get_items () {
+      let start = this.page * this.perPage
+      let end = start + this.perPage
+      return this.items.slice(start, end)
     }
   }
 }
