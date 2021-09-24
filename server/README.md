@@ -3,9 +3,15 @@
 ## Usage
 > These instructions are intended for development usage.
 > For production configure it by yourself for your production environment
-0. `(Optional)` Create Python environment
+0. `(Optional)` Create and activate Python environment
     ```bash
     python3 -m venv env
+
+    # Windows
+    env\Scripts\activate
+
+    # *NIX
+    source venv/bin/activate
     ```
 1. Install the project requirements
     ```bash
