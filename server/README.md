@@ -26,3 +26,12 @@
         DB_PASSWORD=<YOUR_VALUE>
         DB_DATABASE=<YOUR_VALUE>
         ```
+
+## Endpoints
+| Endpoint | Method | Description | Arguments
+| - | - | - | -
+| /items | GET | Get all the items | sort_by, sort_type, sort_value
+| /items | POST | Add new items | date, name, amount, distance
+| /items/`id` | PUT | Modify item | date, name, amount, distance
+| /items/`id` | DELETE | Delete item |
+| /items/fill | GET | Fill items list with random data | count
