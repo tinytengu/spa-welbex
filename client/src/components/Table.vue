@@ -6,7 +6,7 @@
         <div class="input-group mb-3">
           <div class="input-group-prepend">
             <!-- Sort by -->
-            <div class="dropdown">
+            <div class="btn-group">
               <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
                 Sort by {{ sort.field }}
               </button>
@@ -15,7 +15,7 @@
               </div>
             </div>
             <!-- Sort type -->
-            <div class="dropdown">
+            <div class="btn-group">
               <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
                 Sort type {{ sort.type }}
               </button>
@@ -26,10 +26,12 @@
           </div>
           <!-- Sort value -->
           <input type="text" class="form-control" placeholder="" v-model="sort.value">
-          <!-- Sort button -->
-          <button class="btn btn-primary" @click="fetch_items(true)">Sort</button>
-          <!-- Clear button -->
-          <button class="btn btn-danger" @click="reset_sort">Clear</button>
+          <div class="input-group-append">
+            <!-- Sort button -->
+            <button class="btn btn-primary" @click="fetch_items(true)">Sort</button>
+            <!-- Clear button -->
+            <button class="btn btn-danger" @click="reset_sort">Clear</button>
+          </div>
         </div>
       </div>
     </div>
