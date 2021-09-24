@@ -47,6 +47,10 @@ class TableItem(db.Model):
         return '<%s %r>' % (self.__class__.__name__, self.id)
 
 
+def row_to_dict(row):
+    return dict((col, getattr(row, col)) for col in row.__table__.columns.keys())
+
+
 # CORS
 CORS(app)
 
@@ -57,14 +61,66 @@ def index():
     return jsonify('Backend is up')
 
 
-@app.route('/data/', methods=['GET'])
+@app.route('/items/', methods=['GET'])
 def get_items():
     '''Get all the table items'''
-    items = TableItem.query.all()
+
+    # Serialization
+    arg_names = ('sort_by', 'sort_type', 'sort_value')
+    for k in request.args.to_dict():
+        if k not in arg_names:
+            return jsonify({'error': f"Invalid argument '{k}'"})
+
+    # Marshaling
+    args = {
+        name: request.args.get(name) for name in arg_names
+    }
+
+    # sort_by argument
+    sort_by = args['sort_by']
+    if sort_by:
+        sort_options = ('name', 'amount', 'distance')
+        if sort_by not in sort_options:
+            return jsonify({'error': f"Invalid sort_by option: '{sort_by}'"})
+
+    # sort_type argument
+    sort_type = args['sort_type']
+    if sort_type:
+        if not sort_by:
+            return jsonify({'error': "'sort_by' argument required"})
+
+        sort_types = ('contains', 'exact', 'bigger', 'lower')
+        if sort_type not in sort_types:
+            return jsonify({'error': f"Invalid sort_type option: '{sort_type}'"})
+
+    # sort_value argument
+    sort_value = args['sort_value']
+    if sort_value and not (sort_by and sort_type):
+        return jsonify({'error': "Both 'sort_value' and 'sort_type' arguments are required"})
+    elif (sort_by and sort_type) and not sort_value:
+        return jsonify({'error': "'sort_value' argument required"})
+
+    if sort_type in ('bigger', 'lower') and sort_by == 'name':
+        return jsonify({'error': "Invalid sorting type for the 'name' field"})
+
+    # Fetch database items
+    items = list(map(row_to_dict, TableItem.query.all()))
+
+    # Sorting
+    if sort_by and sort_type and sort_value:
+        items = [
+            i for i in items
+            if sort_type == 'contains' and sort_value in str(i[sort_by]) or
+            sort_type == 'exact' and sort_value == str(i[sort_by]) or
+            sort_type == 'bigger' and float(i[sort_by]) > float(sort_value) or
+            sort_type == 'lower' and float(i[sort_by]) < float(sort_value)
+        ]
+
+    # Return items to the client
     return jsonify(items)
 
 
-@app.route('/data/', methods=['POST'])
+@app.route('/items/', methods=['POST'])
 def add_item():
     '''Add new table item'''
 
@@ -88,7 +144,7 @@ def add_item():
     return jsonify(item)
 
 
-@app.route('/data/<id>', methods=['PUT'])
+@app.route('/items/<id>', methods=['PUT'])
 def modify_item(id: int):
     '''Modify table item'''
 
@@ -98,12 +154,13 @@ def modify_item(id: int):
         if k not in fields:
             return jsonify({'error': f"Invalid field '{k}'"})
 
-    # Fields validation
+    # Marshaling
     data = {
         field: request.form[field] for field in fields
         if request.form.get(field)
     }
 
+    # Validation
     if not data:
         return jsonify({'error': 'Data cannot be empty'})
 
@@ -121,7 +178,7 @@ def modify_item(id: int):
     return jsonify(item)
 
 
-@app.route('/data/<id>', methods=['DELETE'])
+@app.route('/items/<id>', methods=['DELETE'])
 def delete_item(id: int):
     '''Delete table item'''
 
