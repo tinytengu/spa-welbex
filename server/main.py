@@ -12,6 +12,7 @@ load_dotenv()
 
 # Flask Application
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 
 # SQLAlchemy
 app.config.update({
@@ -26,7 +27,7 @@ db = SQLAlchemy(app)
 
 @dataclass
 class TableItem(db.Model):
-    __tablename__ = 'data'
+    __tablename__ = 'items'
 
     # Serialization fields
     id: int
@@ -138,4 +139,7 @@ def delete_item(id: int):
 
 
 if __name__ == '__main__':
+    db.create_all()
+    db.session.commit()
+
     app.run(host='127.0.0.1', port=5000, debug=True)
