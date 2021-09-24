@@ -11,7 +11,7 @@
     env\Scripts\activate
 
     # *NIX
-    source venv/bin/activate
+    source env/bin/activate
     ```
 1. Install the project requirements
     ```bash
