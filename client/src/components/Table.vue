@@ -48,6 +48,7 @@ import Pagination from './Pagination'
 import TableView from './TableView'
 
 const axios = require('axios')
+const config = require('@/config')
 
 export default {
   name: 'Table',
@@ -107,12 +108,12 @@ export default {
     fetch_items (sort = false) {
       var _this = this
 
-      let url = 'http://localhost:5000/items'
+      let url = `${config.API_BASE}/items`
       if (sort === true) {
         let field = this.sort.field.toLowerCase()
         let type = this.sort.type.toLowerCase()
 
-        url = `http://localhost:5000/items?sort_by=${field}&sort_type=${type}&sort_value=${this.sort.value}`
+        url += `?sort_by=${field}&sort_type=${type}&sort_value=${this.sort.value}`
       }
 
       axios.get(url)
