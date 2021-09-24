@@ -49,34 +49,26 @@
           </tr>
         </tbody>
       </table>
-      <nav v-if="get_pages_count() != 0">
-        <ul class="pagination">
-          <!-- Previous -->
-          <li class="page-item" :class="page == 0 ? 'disabled' : ''">
-            <a class="page-link" href="#" @click.prevent="page--">Previous</a>
-          </li>
-          <!-- Pages -->
-          <li class="page-item" :class="page == i - 1 ? 'active' : ''" v-for="i in get_pages_count()" :key="i">
-            <a class="page-link" href="#" @click.prevent="page = i - 1">{{ i }}</a>
-          </li>
-          <!-- Next -->
-          <li class="page-item" :class="page == get_pages_count() - 1 ? 'disabled' : ''">
-            <a class="page-link" href="#" @click.prevent="page++">Next</a>
-          </li>
-        </ul>
-      </nav>
+      <Pagination v-if="pagesCount > 1" :perPage="table.perPage" :pages="pagesCount" @pageChanged="table.page = $event"/>
     </div>
   </div>
 </template>
 
 <script>
+import Pagination from './Pagination'
+
 const axios = require('axios')
 
 export default {
+  components: { Pagination },
   name: 'Table',
   data () {
     return {
       items: [],
+      table: {
+        perPage: 10,
+        page: 0
+      },
       sort_field: null,
       sort_fields: [
         '',
@@ -99,9 +91,7 @@ export default {
         'date',
         'amount',
         'distance'
-      ],
-      page: 0,
-      perPage: 10
+      ]
     }
   },
   mounted () {
@@ -109,6 +99,11 @@ export default {
     this.sort_type = this.sort_types[0]
 
     this.fetch_items()
+  },
+  computed: {
+    pagesCount () {
+      return Math.ceil(this.items.length / this.table.perPage)
+    }
   },
   methods: {
     fetch_items (sort = false) {
@@ -137,12 +132,9 @@ export default {
 
       this.fetch_items()
     },
-    get_pages_count () {
-      return Math.ceil(this.items.length / this.perPage)
-    },
     get_items () {
-      let start = this.page * this.perPage
-      let end = start + this.perPage
+      let start = this.table.page * this.table.perPage
+      let end = start + this.table.perPage
       return this.items.slice(start, end)
     }
   }
