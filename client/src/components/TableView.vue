@@ -19,7 +19,9 @@
 export default {
   name: 'TableView',
   props: {
+    // Heading fields
     fields: Array,
+    // Items to display
     items: Array
   }
 }

@@ -21,14 +21,19 @@
 export default {
   name: 'Pagination',
   props: {
+    // Total pages count
     pages: Number
   },
   data () {
     return {
+      // Current page
       page: 0
     }
   },
   watch: {
+    /**
+     * Emit pageChanged event when 'page' value changed
+     */
     page (newValue, oldValue) {
       this.$emit('pageChanged', newValue)
     }
