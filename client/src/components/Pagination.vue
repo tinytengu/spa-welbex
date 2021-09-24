@@ -19,6 +19,7 @@
 
 <script>
 export default {
+  name: 'Pagination',
   props: {
     pages: Number
   },

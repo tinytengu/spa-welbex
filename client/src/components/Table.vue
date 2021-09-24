@@ -35,20 +35,7 @@
     </div>
     <!-- Table -->
     <div class="row">
-      <table class="table">
-        <thead v-if="items">
-          <tr>
-            <th scope="col" v-for="i in table_fields" :key="i">{{ i }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="i in get_items()" :key="i.id">
-            <td v-for="f in table_fields" :key="f">
-              {{ i[f] }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <TableView :fields="table_fields" :items="get_items()"/>
       <Pagination v-if="pagesCount > 1" :perPage="table.perPage" :pages="pagesCount" @pageChanged="table.page = $event"/>
     </div>
   </div>
@@ -56,11 +43,12 @@
 
 <script>
 import Pagination from './Pagination'
+import TableView from './TableView'
 
 const axios = require('axios')
 
 export default {
-  components: { Pagination },
+  components: { Pagination, TableView },
   name: 'Table',
   data () {
     return {
