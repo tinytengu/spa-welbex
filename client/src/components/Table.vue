@@ -4,28 +4,28 @@
     <div class="row justify-content-end">
       <div class="col">
         <div class="input-group mb-3">
-          <div class="input-group-prepend" id="button-addon3">
+          <div class="input-group-prepend">
             <!-- Sort by -->
             <div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="sortByBtn" data-toggle="dropdown">
-                Sort by {{ sort_field }}
+              <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                Sort by {{ sort.field }}
               </button>
-              <div class="dropdown-menu" aria-labelledby="sortByBtn">
-                <a class="dropdown-item" href="#" v-for="i in sort_fields" :key="i" @click="sort_field = i">{{ i }}</a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#" v-for="i in sort.fields" :key="i" @click="sort.field = i">{{ i }}</a>
               </div>
             </div>
             <!-- Sort type -->
             <div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="sortTypeBtn" data-toggle="dropdown">
-                Sort type {{ sort_type }}
+              <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                Sort type {{ sort.type }}
               </button>
-              <div class="dropdown-menu" aria-labelledby="sortTypeBtn">
-                <a class="dropdown-item" href="#" v-for="i in sort_types" :key="i" @click="sort_type = i">{{ i }}</a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#" v-for="i in sort.types" :key="i" @click="sort.type = i">{{ i }}</a>
               </div>
             </div>
           </div>
           <!-- Sort value -->
-          <input type="text" class="form-control" placeholder="" v-model="sort_value">
+          <input type="text" class="form-control" placeholder="" v-model="sort.value">
           <!-- Sort button -->
           <button class="btn btn-primary" @click="fetch_items(true)">Sort</button>
           <!-- Clear button -->
@@ -35,7 +35,7 @@
     </div>
     <!-- Table -->
     <div class="row">
-      <TableView :fields="table_fields" :items="get_items()"/>
+      <TableView :fields="table.fields" :items="pageItems"/>
       <Pagination v-if="pagesCount > 1" :perPage="table.perPage" :pages="pagesCount" @pageChanged="table.page = $event"/>
     </div>
   </div>
@@ -48,49 +48,57 @@ import TableView from './TableView'
 const axios = require('axios')
 
 export default {
-  components: { Pagination, TableView },
   name: 'Table',
+  components: { Pagination, TableView },
   data () {
     return {
       items: [],
       table: {
         perPage: 10,
-        page: 0
+        page: 0,
+        fields: [
+          'id',
+          'name',
+          'date',
+          'amount',
+          'distance'
+        ]
       },
-      sort_field: null,
-      sort_fields: [
-        '',
-        'Name',
-        'Amount',
-        'Distance'
-      ],
-      sort_type: null,
-      sort_types: [
-        '',
-        'Contains',
-        'Exact',
-        'Bigger',
-        'Lower'
-      ],
-      sort_value: '',
-      table_fields: [
-        'id',
-        'name',
-        'date',
-        'amount',
-        'distance'
-      ]
+      sort: {
+        field: '',
+        fields: [
+          '',
+          'Name',
+          'Amount',
+          'Distance'
+        ],
+        type: '',
+        types: [
+          '',
+          'Contains',
+          'Exact',
+          'Bigger',
+          'Lower'
+        ],
+        value: ''
+      }
     }
   },
   mounted () {
-    this.sort_field = this.sort_fields[0]
-    this.sort_type = this.sort_types[0]
-
     this.fetch_items()
   },
   computed: {
     pagesCount () {
       return Math.ceil(this.items.length / this.table.perPage)
+    },
+    pageItems () {
+      if (this.items === undefined || this.items.length === 0) {
+        return []
+      }
+
+      let start = this.table.page * this.table.perPage
+      let end = start + this.table.perPage
+      return this.items.slice(start, end)
     }
   },
   methods: {
@@ -99,31 +107,23 @@ export default {
 
       let url = 'http://localhost:5000/items'
       if (sort === true) {
-        let field = this.sort_field.toLowerCase()
-        let type = this.sort_type.toLowerCase()
+        let field = this.sort.field.toLowerCase()
+        let type = this.sort.type.toLowerCase()
 
-        url = `http://localhost:5000/items?sort_by=${field}&sort_type=${type}&sort_value=${this.sort_value}`
+        url = `http://localhost:5000/items?sort_by=${field}&sort_type=${type}&sort_value=${this.sort.value}`
       }
 
       axios.get(url)
         .then(function (response) {
           _this.items = response.data
         })
-        .catch(function (error) {
-          console.log(error)
-        })
     },
     reset_sort () {
-      this.sort_field =
-      this.sort_type =
-      this.sort_value = ''
+      this.sort.field =
+      this.sort.type =
+      this.sort.value = ''
 
       this.fetch_items()
-    },
-    get_items () {
-      let start = this.table.page * this.table.perPage
-      let end = start + this.table.perPage
-      return this.items.slice(start, end)
     }
   }
 }
