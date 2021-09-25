@@ -146,6 +146,8 @@ def delete_item(id: int):
 
 @bp.route('/fill', methods=['GET'])
 def fill_items():
+    '''File table items with random data'''
+
     args = request.args.to_dict()
     count = int(args.get('count', 10))
 
